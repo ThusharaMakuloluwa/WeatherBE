@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using WeatherBE.DTOs;
+using WeatherBE.Models;
 using WeatherBE.Options;
 using WeatherBE.Services.Interfaces;
 
@@ -35,14 +36,39 @@ namespace WeatherBE.Services
             if (!response.IsSuccessStatusCode) return null;
 
             var json = await response.Content.ReadAsStringAsync();
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
+            
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            
+            var weatherData = JsonSerializer.Deserialize<OpenWeatherResponse>(json, options);
+            
+            if (weatherData == null) return null;
 
             var result = new WeatherResultDTO
             {
-                CityName = root.GetProperty("name").GetString() ?? "",
-                Description = root.GetProperty("weather")[0].GetProperty("description").GetString() ?? "",
-                Temperature = root.GetProperty("main").GetProperty("temp").GetDouble()
+                CityId = weatherData.Id,
+                CityName = weatherData.Name,
+                Country = weatherData.Sys.Country,
+                DateTime = DateTimeOffset.FromUnixTimeSeconds(weatherData.Dt)
+                    .ToOffset(TimeSpan.FromSeconds(weatherData.Timezone))
+                    .ToString("yyyy-MM-dd HH:mm:ss"),
+                Temperature = weatherData.Main.Temp,
+                TempMin = weatherData.Main.TempMin,
+                TempMax = weatherData.Main.TempMax,
+                Description = weatherData.Weather.FirstOrDefault()?.Description ?? "",
+                Pressure = weatherData.Main.Pressure,
+                Humidity = weatherData.Main.Humidity,
+                Visibility = weatherData.Visibility,
+                WindSpeed = weatherData.Wind.Speed,
+                WindDegree = weatherData.Wind.Deg,
+                Sunrise = DateTimeOffset.FromUnixTimeSeconds(weatherData.Sys.Sunrise)
+                    .ToOffset(TimeSpan.FromSeconds(weatherData.Timezone))
+                    .ToString("yyyy-MM-dd HH:mm:ss"),
+                Sunset = DateTimeOffset.FromUnixTimeSeconds(weatherData.Sys.Sunset)
+                    .ToOffset(TimeSpan.FromSeconds(weatherData.Timezone))
+                    .ToString("yyyy-MM-dd HH:mm:ss")
             };
 
             _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
