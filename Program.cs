@@ -1,8 +1,31 @@
 using WeatherBE.Options;
 using WeatherBE.Services;
 using WeatherBE.Services.Interfaces;
+using Microsoft.IdentityModel.Tokens; 
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+var domain = builder.Configuration["Auth0:Domain"];
+var audience = builder.Configuration["Auth0:Audience"];
+
+builder.Services
+    .AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.Authority = $"https://{domain}/";
+        options.Audience = audience;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = $"https://{domain}/",
+            ValidateAudience = true,
+            ValidAudience = audience,
+            ValidateLifetime = true
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // Add services to the container.
 
@@ -49,6 +72,7 @@ app.UseCors(corsPolicy);
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
