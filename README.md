@@ -3,7 +3,7 @@
 This is the backend Web API for the Weather App.  
 (Frontend → [WeatherUI](https://github.com/ThusharaMakuloluwa/WeatherUI.git))
 
-It exposes endpoints to:
+The API:
 
 - Loads a static list of cities from `Data/cities.json`
 - Retrieves live weather information from **OpenWeather API**
