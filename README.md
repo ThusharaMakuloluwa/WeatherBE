@@ -1,7 +1,7 @@
 # Weather API – ASP.NET Core 8 (Backend)
 
 This is the backend Web API for the Weather App.  
-(Frontend -> [https://github.com/ThusharaMakuloluwa/WeatherUI.git](WeatheUI))
+(Frontend → [WeatherUI](https://github.com/ThusharaMakuloluwa/WeatherUI.git))
 
 It exposes endpoints to:
 
